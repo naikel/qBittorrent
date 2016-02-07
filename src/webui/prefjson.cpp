@@ -137,10 +137,12 @@ QByteArray prefjson::getPreferences()
     data["max_active_torrents"] = pref->getMaxActiveTorrents();
     data["max_active_uploads"] = pref->getMaxActiveUploads();
     data["dont_count_slow_torrents"] = pref->ignoreSlowTorrentsForQueueing();
-    // Share Ratio Limiting
+    // Share Limiting
     data["max_ratio_enabled"] = (pref->getGlobalMaxRatio() >= 0.);
     data["max_ratio"] = pref->getGlobalMaxRatio();
     data["max_ratio_act"] = static_cast<int>(pref->getMaxRatioAction());
+    data["max_seeding_time_enabled"] = (pref->getGlobalMaxSeedingTime() >= 0.);
+    data["max_seeding_time"] = pref->getGlobalMaxSeedingTime();
 
     // Web UI
     // Language
@@ -350,6 +352,10 @@ void prefjson::setPreferences(const QString& json)
         pref->setGlobalMaxRatio(m["max_ratio"].toReal());
     else
         pref->setGlobalMaxRatio(-1);
+    if (m.contains("max_seeding_time_enabled"))
+        pref->setGlobalMaxSeedingMinutes(m["max_seeding_time"].toInt());
+    else
+        pref->setGlobalMaxSeedingMinutes(-1);
     if (m.contains("max_ratio_act"))
         pref->setMaxRatioAction(static_cast<MaxRatioAction>(m["max_ratio_act"].toInt()));
 

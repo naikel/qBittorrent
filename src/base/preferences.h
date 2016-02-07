@@ -280,7 +280,9 @@ public:
     QString getTrackersList() const;
     void setTrackersList(const QString &val);
     qreal getGlobalMaxRatio() const;
+    int getGlobalMaxSeedingTime() const;
     void setGlobalMaxRatio(qreal ratio);
+    void setGlobalMaxSeedingMinutes(int minutes);
     MaxRatioAction getMaxRatioAction() const;
     void setMaxRatioAction(MaxRatioAction act);
 

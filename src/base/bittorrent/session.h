@@ -134,7 +134,7 @@ namespace BitTorrent
         TriStateBool addForced;
         TriStateBool addPaused;
         QVector<int> filePriorities; // used if TorrentInfo is set
-        bool ignoreShareRatio = false;
+        bool ignoreShareLimits = false;
         bool skipChecking = false;
     };
 
@@ -165,6 +165,7 @@ namespace BitTorrent
         bool isPexEnabled() const;
         bool isQueueingEnabled() const;
         qreal globalMaxRatio() const;
+        int globalMaxSeedingTime() const;
         bool isTempPathEnabled() const;
         bool isAppendExtensionEnabled() const;
         bool useAppendLabelToSavePath() const;
@@ -188,6 +189,7 @@ namespace BitTorrent
         void setDownloadRateLimit(int rate);
         void setUploadRateLimit(int rate);
         void setGlobalMaxRatio(qreal ratio);
+        void setGlobalMaxSeedingTime(int minutes);
         void enableIPFilter(const QString &filterPath, bool force = false);
         void disableIPFilter();
         void banIP(const QString &ip);
@@ -206,7 +208,7 @@ namespace BitTorrent
         void bottomTorrentsPriority(const QStringList &hashes);
 
         // TorrentHandle interface
-        void handleTorrentRatioLimitChanged(TorrentHandle *const torrent);
+        void handleTorrentShareLimitChanged(TorrentHandle *const torrent);
         void handleTorrentSavePathChanged(TorrentHandle *const torrent);
         void handleTorrentLabelChanged(TorrentHandle *const torrent, const QString &oldLabel);
         void handleTorrentMetadataReceived(TorrentHandle *const torrent);
@@ -259,7 +261,7 @@ namespace BitTorrent
         void configure();
         void readAlerts();
         void refresh();
-        void processBigRatios();
+        void processShareLimits();
         void generateResumeData(bool final = false);
         void handleIPFilterParsed(int ruleCount);
         void handleIPFilterError();
@@ -277,6 +279,7 @@ namespace BitTorrent
         ~Session();
 
         bool hasPerTorrentRatioLimit() const;
+        bool hasPerTorrentSeedingTimeLimit() const;
 
         void initResumeFolder();
 
@@ -304,7 +307,7 @@ namespace BitTorrent
                              const TorrentInfo &torrentInfo = TorrentInfo(),
                              const QByteArray &fastresumeData = QByteArray());
 
-        void updateRatioTimer();
+        void updateSeedingLimitTimer();
         void exportTorrentFile(TorrentHandle *const torrent, TorrentExportFolder folder = TorrentExportFolder::Regular);
         void saveTorrentResumeData(TorrentHandle *const torrent);
 
@@ -344,6 +347,7 @@ namespace BitTorrent
         bool m_finishedTorrentExportEnabled;
         bool m_preAllocateAll;
         qreal m_globalMaxRatio;
+        int m_globalMaxSeedingTime;
         int m_numResumeData;
         int m_extraLimit;
         bool m_appendLabelToSavePath;
@@ -359,7 +363,7 @@ namespace BitTorrent
         QHash<InfoHash, QString> m_savePathsToRemove;
 
         QTimer *m_refreshTimer;
-        QTimer *m_bigRatioTimer;
+        QTimer *m_seedingLimitTimer;
         QTimer *m_resumeDataTimer;
         Statistics *m_statistics;
         // IP filtering

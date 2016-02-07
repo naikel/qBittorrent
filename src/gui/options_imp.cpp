@@ -135,6 +135,8 @@ options_imp::options_imp(QWidget *parent)
     // Connect signals / slots
     connect(comboProxyType, SIGNAL(currentIndexChanged(int)), this, SLOT(enableProxy(int)));
     connect(checkRandomPort, SIGNAL(toggled(bool)), spinPort, SLOT(setDisabled(bool)));
+    connect(checkMaxRatio, SIGNAL(toggled(bool)), this, SLOT(enableRatioLimitAct()));
+    connect(checkMaxSeedingMinutes, SIGNAL(toggled(bool)), this, SLOT(enableRatioLimitAct()));
 
     // Apply button is activated when a value is changed
     // General tab
@@ -237,6 +239,8 @@ options_imp::options_imp(QWidget *parent)
     connect(comboEncryption, SIGNAL(currentIndexChanged(int)), this, SLOT(enableApplyButton()));
     connect(checkMaxRatio, SIGNAL(toggled(bool)), this, SLOT(enableApplyButton()));
     connect(spinMaxRatio, SIGNAL(valueChanged(QString)), this, SLOT(enableApplyButton()));
+    connect(checkMaxSeedingMinutes, SIGNAL(toggled(bool)), this, SLOT(enableApplyButton()));
+    connect(spinMaxSeedingMinutes, SIGNAL(valueChanged(QString)), this, SLOT(enableApplyButton()));
     connect(comboRatioLimitAct, SIGNAL(currentIndexChanged(int)), this, SLOT(enableApplyButton()));
     // Proxy tab
     connect(comboProxyType, SIGNAL(currentIndexChanged(int)), this, SLOT(enableApplyButton()));
@@ -495,6 +499,7 @@ void options_imp::saveOptions()
     pref->setAddTrackersEnabled(checkEnableAddTrackers->isChecked());
     pref->setTrackersList(textTrackers->toPlainText());
     pref->setGlobalMaxRatio(getMaxRatio());
+    pref->setGlobalMaxSeedingMinutes(getMaxSeedingMinutes());
     pref->setMaxRatioAction(static_cast<MaxRatioAction>(comboRatioLimitAct->currentIndex()));
     // End Bittorrent preferences
     // Misc preferences
@@ -830,15 +835,26 @@ void options_imp::loadOptions()
         // Enable
         checkMaxRatio->setChecked(true);
         spinMaxRatio->setEnabled(true);
-        comboRatioLimitAct->setEnabled(true);
         spinMaxRatio->setValue(floatValue);
     }
     else {
         // Disable
         checkMaxRatio->setChecked(false);
         spinMaxRatio->setEnabled(false);
-        comboRatioLimitAct->setEnabled(false);
     }
+    intValue = pref->getGlobalMaxSeedingTime();
+    if (intValue >= 0) {
+        // Enable
+        checkMaxSeedingMinutes->setChecked(true);
+        spinMaxSeedingMinutes->setEnabled(true);
+        spinMaxSeedingMinutes->setValue(intValue);
+    }
+    else {
+        // Disable
+        checkMaxSeedingMinutes->setChecked(false);
+        spinMaxSeedingMinutes->setEnabled(false);
+    }
+    comboRatioLimitAct->setEnabled(intValue >= 0 || floatValue >= 0.);
     comboRatioLimitAct->setCurrentIndex(static_cast<int>(pref->getMaxRatioAction()));
     // End Bittorrent preferences
 
@@ -969,6 +985,13 @@ qreal options_imp::getMaxRatio() const
     return -1;
 }
 
+int options_imp::getMaxSeedingMinutes() const
+{
+    if (checkMaxSeedingMinutes->isChecked())
+        return spinMaxSeedingMinutes->value();
+    return -1;
+}
+
 // Return Save Path
 QString options_imp::getSavePath() const
 {
@@ -1076,6 +1099,11 @@ bool options_imp::useAdditionDialog() const
 void options_imp::enableApplyButton()
 {
     applyButton->setEnabled(true);
+}
+
+void options_imp::enableRatioLimitAct()
+{
+    comboRatioLimitAct->setEnabled(checkMaxRatio->isChecked() || checkMaxSeedingMinutes->isChecked());
 }
 
 void options_imp::enableProxy(int index)

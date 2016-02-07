@@ -992,9 +992,19 @@ qreal Preferences::getGlobalMaxRatio() const
     return value("Preferences/Bittorrent/MaxRatio", -1).toReal();
 }
 
+int Preferences::getGlobalMaxSeedingTime() const
+{
+    return value("Preferences/Bittorrent/MaxSeedingTime", -1).toInt();
+}
+
 void Preferences::setGlobalMaxRatio(qreal ratio)
 {
     setValue("Preferences/Bittorrent/MaxRatio", ratio);
+}
+
+void Preferences::setGlobalMaxSeedingMinutes(int minutes)
+{
+    setValue("Preferences/Bittorrent/MaxSeedingTime", minutes);
 }
 
 MaxRatioAction Preferences::getMaxRatioAction() const
